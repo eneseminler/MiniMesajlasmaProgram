@@ -1,0 +1,25 @@
+{
+  "name": "minimesajlasmaprogram",
+  "version": "1.0.0",
+  "description": "Node.js ile yazılmaktadır.",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mysql": "^2.16.0",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eneseminler/MiniMesajlasmaProgram.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eneseminler/MiniMesajlasmaProgram/issues"
+  },
+  "homepage": "https://github.com/eneseminler/MiniMesajlasmaProgram#readme"
+}
