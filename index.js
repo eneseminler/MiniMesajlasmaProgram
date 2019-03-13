@@ -1,6 +1,6 @@
 var express  = require("express");
 var app = express();
-var sunucu = app.listen("8000");
+var sunucu = app.listen("5000");
 var io = require("socket.io").listen(sunucu);
 var yol = require("path");
 var mysql = require("mysql");
@@ -10,6 +10,8 @@ var baglanti = mysql.createConnection({
 	password: '12345678',
 	database: 'nodejs'
 });
+
+
 
 baglanti.connect();
 io.sockets.on("connection", function (socket){
@@ -26,6 +28,7 @@ socket.on("gonder", function(veri)
 
 socket.on("mesaj", function(veri)
 {
+	
 	console.log(veri);
 		var mesaj = {mesaj:veri.mesaj,kullanici:veri.kullanici};
 	var query = baglanti.query('insert into nodejs set ?',mesaj, function(hata,cevap){

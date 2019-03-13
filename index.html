@@ -2,111 +2,156 @@
 <html>
 <head>
 	<title>Mesajlasma</title>
-	<script src="/socket.io/socket.io.js"></script>
-	
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-	<script>
-		var socket = io.connect();
-		var isim = prompt("Lütfen isminizi giriniz");
-		socket.emit("gonder", isim);
-		socket.on("al", function(veri)
-		{
-			if (veri != isim) {
-				alert(veri + "sisteme giriş yaptı.");
-			}
-		})
-	</script>
-	<script type="text/javascript">
-	function yazildi(){
-		var tus = window.event.keyCode;
-		if (tus == 13) {
-		 var metin = document.getElementById('mesaj').value; socket.emit("mesaj", {"mesaj":metin,"kullanici":isim});
 
-		document.getElementById('mesaj').value = "";
-
-	}
-	}  
-
-
-	socket.on("mesajAl", function(veri)
-	{
-        $('#mesajlar').append($('<li>').text(veri.kullanici + ": " + veri.mesaj));
-	});
-	</script>
 
 	<style type="text/css">
-    
-*{ 
-  box-sizing: border-box; 
-}
-      
-body{ 
-  font-family: Helvetica, Arial; 
+
+*{
+  box-sizing: border-box;
 }
 
-form {
-  background: #000;
-  padding: 3px; 
-  position: fixed; 
-  bottom: 0; 
+body{
+  font-family: "HelveticaNeue-Light", Arial, sans-serif;
+
+}
+
+
+html{
+  font-family:
+    "HelveticaNeue-Light",
+    "Helvetica Neue Light",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    "Lucida Grande",
+    sans-serif;
+
+    margin: 10px;
+    padding: 0px;
+}
+
+
+
+.Mesaj{
+  border: 10px solid #000;
+  bottom: 0;
+  height: 60px;
+  left: 0;
+  outline: none;
+  padding-left: 10px;
+  position: absolute;
+  right: 0;
   width: 100%;
-}
-     
-form input {
-  border: 0; 
-  padding: 10px; 
-  width: 90%; 
-  margin-right: .5%; 
-}
-
-form button { 
-  width: 9%; 
-  background: rgb(130, 224, 255); 
-  border: none; 
-  padding: 10px; 
-}
-      
-#mesajlar { 
-  list-style-type: none; 
-  margin: 0; 
-  padding: 0; 
-}
-#mesajlar li { 
-  padding: 15px 25px;
-  background-color: gainsboro;
-  list-style: none;
 
 }
-#mesajlar li:nth-child(odd) { 
-  background: #eee; 
-}
 
-#mesaj{
-	padding: 15px 25px;
-	font-size: 16px;
-	bottom: 0;
 }
 .baslik {
   padding: 25px;
   background-color: #777;
-
 }
-.baslik h3{
-  font-size: 45px!important;
+
+.content{
+  height: %100;
+}
+
+.mesajlar{
+  height: %100;
+  margin: 0px;
+  overflow-y: scroll;
+  padding: 10px 20px 10px 20px;
+}
+.mesajlar li{
+
+  /*padding: 15px 25px;*/
+  background-color: gainsboro;
+  list-style: none;
+}
+
+.mesajlar li:nth-child(odd) {
+  background: #eee;
+}
+
+.mesajlar li .a{
+
 }
 
   </style>
 
 
-
-
 </head>
+
+
+
+
+
+
 <body>
+
+
+
 <div class="baslik"><h2>Ortak Oda</h2></div>
 
- <ul id="mesajlar"></ul>
-<textarea id="mesaj" onkeypress="yazildi()" rows="1" cols="125" placeholder="Mesajınızı yazınız." autofocus></textarea>
+<div class="content">
+<div class="mesajalani">
 
+<ul class="mesajlar"></ul>
+
+</div>
+
+
+<input class="Mesaj" type="text" autofocus placeholder="Mesajınızı yazınız..."/>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <script type="text/javascript">
+
+    var socket = io.connect();
+    var isim = prompt("Lütfen isminizi giriniz");
+    socket.emit("gonder", isim);
+    socket.on("al", function(veri)
+    {
+      if (veri != isim) {
+        alert(veri + "sisteme giriş yaptı.");
+      }
+    })
+
+
+
+  function yazildi(){
+    var tus = window.event.keyCode;
+    if (tus == 13) {
+    
+    var metin = $Mesaj.val(); 
+
+    socket.emit("mesaj", {"mesaj":metin,"kullanici":isim});
+
+    document.getElementById('mesaj').value = "";
+    $Mesaj.val("");
+  }
+  }
+
+
+  socket.on("mesajAl", function(veri)
+  {
+        $('.mesajlar').append($('<li>').text(veri.kullanici + ": " + veri.mesaj));
+  });
+
+
+    </script>
 
 </body>
 </html>
