@@ -2,113 +2,85 @@
 <html>
 <head>
 	<title>Mesajlasma</title>
+	
 
-
-	<style type="text/css">
+  <style type="text/css">
 
 *{
   box-sizing: border-box;
 }
 
 body{
-  font-family: "HelveticaNeue-Light", Arial, sans-serif;
-
+  font-family: "Helvetica Neue",sans-serif;
 }
 
-
-html{
-  font-family:
-    "HelveticaNeue-Light",
-    "Helvetica Neue Light",
-    "Helvetica Neue",
-    Helvetica,
-    Arial,
-    "Lucida Grande",
-    sans-serif;
-
-    margin: 10px;
-    padding: 0px;
+.mesajlar {
+  
+  height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  padding-left: 10px;
 }
 
+.mesajlar li {
+  padding: 15px 0px;
+  background-color: #eee;
+  list-style: none;
+  display: list-item;
+  border-bottom: 1px solid black;
+  border-radius: 25px solid white;
 
+}
+.mesajlar li:nth-child(odd) {
+}
 
-.Mesaj{
+.MesajAlani{
+  height: 100%;
+  padding-bottom: 60px;
+}
+
+.mesajText{ 
   border: 10px solid #000;
-  bottom: 0;
+  bottom: 0px !important;
   height: 60px;
   left: 0;
   outline: none;
-  padding-left: 10px;
-  position: absolute;
+  padding: 10px;
+  position: static;
   right: 0;
   width: 100%;
 
 }
 
+.baslik{
+  padding: 15px;
+  background-color: aliceblue;
 }
-.baslik {
-  padding: 25px;
-  background-color: #777;
+.baslik h2{
+  text-align: center;
 }
-
 .content{
-  height: %100;
 }
 
-.mesajlar{
-  height: %100;
-  margin: 0px;
-  overflow-y: scroll;
-  padding: 10px 20px 10px 20px;
-}
-.mesajlar li{
-
-  /*padding: 15px 25px;*/
-  background-color: gainsboro;
-  list-style: none;
-}
-
-.mesajlar li:nth-child(odd) {
-  background: #eee;
-}
-
-.mesajlar li .a{
-
-}
 
   </style>
 
 
 </head>
-
-
-
-
-
-
 <body>
-
 
 
 <div class="baslik"><h2>Ortak Oda</h2></div>
 
+
+
+
 <div class="content">
-<div class="mesajalani">
-
-<ul class="mesajlar"></ul>
-
+ <div class="MesajAlani">
+ <ul class="mesajlar"></ul>
+ </div>
+<input class="mesajText" onkeypress="yazildi()" placeholder="Mesajınızı yazınız." autofocus> 
 </div>
-
-
-<input class="Mesaj" type="text" autofocus placeholder="Mesajınızı yazınız..."/>
-</div>
-
-
-
-
-
-
-
 
 
 
@@ -134,13 +106,18 @@ html{
   function yazildi(){
     var tus = window.event.keyCode;
     if (tus == 13) {
-    
-    var metin = $Mesaj.val(); 
-
+     // var metin = document.getElementById('mesaj').value;
+     var metin =  $(".mesajText").val();
+     if( metin ==  '' )
+     {
+      alert("sa");
+      exit;
+     }
     socket.emit("mesaj", {"mesaj":metin,"kullanici":isim});
 
-    document.getElementById('mesaj').value = "";
-    $Mesaj.val("");
+    $(".mesajText").val("");
+    // document.getElementById('mesaj').value = "";
+
   }
   }
 
