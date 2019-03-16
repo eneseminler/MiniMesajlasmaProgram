@@ -3,7 +3,7 @@
 <head>
 	<title>Mesajlasma</title>
 	
-
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <style type="text/css">
 
 *{
@@ -19,34 +19,37 @@ body{
   height: 100%;
   margin: 0;
   overflow-y: scroll;
-  padding-left: 10px;
+  padding-left: 0px;
 }
 
 .mesajlar li {
-  padding: 15px 0px;
+  padding: 15px 15px;
   background-color: #eee;
   list-style: none;
   display: list-item;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid cadetblue;
   border-radius: 25px solid white;
+
+  color: cadetblue;
 
 }
 .mesajlar li:nth-child(odd) {
 }
 
 .MesajAlani{
-  height: 100%;
-  padding-bottom: 60px;
+  height: 560px;
+  padding-bottom: 0px;
+
 }
 
 .mesajText{ 
-  border: 10px solid #000;
+  border: 10px solid cadetblue;
   bottom: 0px !important;
   height: 60px;
   left: 0;
   outline: none;
-  padding: 10px;
-  position: static;
+  padding: 0px;
+  position: fixed;
   right: 0;
   width: 100%;
 
@@ -60,6 +63,17 @@ body{
   text-align: center;
 }
 .content{
+  margin: 100px 25px 60px 25px;
+  border: 1px solid #343a40;
+  height: 600px;
+}
+.kullanicidiv{
+  background-color: cadetblue;
+  height: 40px;
+}
+
+.kullanici{
+  padding: 5px;
 }
 
 
@@ -70,17 +84,41 @@ body{
 <body>
 
 
-<div class="baslik"><h2>Ortak Oda</h2></div>
-
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+ 
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarCollapse">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
+   
+  </div>
+   <a class="navbar-brand justify-content-center" href="#">Ortak Oda</a>
+</nav>
 
 
 
 <div class="content">
- <div class="MesajAlani">
+<div class="kullanicidiv"> <h4 class="kullanici">Adınız</h4></div>
+ <div class="MesajAlani overflow-auto">
  <ul class="mesajlar"></ul>
  </div>
 <input class="mesajText" onkeypress="yazildi()" placeholder="Mesajınızı yazınız." autofocus> 
 </div>
+
+
+
+
 
 
 
@@ -94,6 +132,10 @@ body{
     var socket = io.connect();
     var isim = prompt("Lütfen isminizi giriniz");
     socket.emit("gonder", isim);
+
+
+    $('.kullanici').text(isim);
+    
     socket.on("al", function(veri)
     {
       if (veri != isim) {
@@ -124,7 +166,15 @@ body{
 
   socket.on("mesajAl", function(veri)
   {
-        $('.mesajlar').append($('<li>').text(veri.kullanici + ": " + veri.mesaj));
+
+        var llii =$("<li class='mesaj'></li>");
+       
+        
+        $('.mesajlar').append($(llii)).text(veri.kullanici + ": " + veri.mesaj));
+        $('mesaj').append($('<span>').text(veri.kullanici))
+
+        // $('.mesajlar').append($('<li>').append($'<span>').text(veri.kullanici));
+
   });
 
 
