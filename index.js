@@ -6,9 +6,9 @@ var yol = require("path");
 var mysql = require("mysql");
 var baglanti = mysql.createConnection({
 	host:'localhost',
-	user:'emrecanful' ,
-	password: '1321912199haha',
-	database: 'chatapp'
+	user:'root' ,
+	password: '12345678',
+	database: 'nodejs'
 });
 
 
@@ -46,7 +46,7 @@ socket.on("mesaj", function(veri)
 
 app.get("/", function(talep,cevap)
 	{
-		cevap.sendFile(yol.join(__dirname + "/newIndex.html"));
+		cevap.sendFile(yol.join(__dirname + "/index.html"));
 	});
 
 console.log("Sunucu Aktif");
