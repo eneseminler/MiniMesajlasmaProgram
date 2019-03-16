@@ -14,6 +14,9 @@ var baglanti = mysql.createConnection({
 
 
 baglanti.connect();
+
+var KullaniciSayi = 0;
+
 io.sockets.on("connection", function (socket){
 
 socket.on("gonder", function(veri)
@@ -23,6 +26,9 @@ socket.on("gonder", function(veri)
 	//giriş yaptığında veri buraya gelecek 
 	console.log(veri + "sisteme giriş yaptı.");
 	io.sockets.emit("al",veri);
+	++KullaniciSayi;
+	console.log(KullaniciSayi + "server");
+	io.sockets.emit("alsayi",KullaniciSayi);
 })
 
 
@@ -46,7 +52,7 @@ socket.on("mesaj", function(veri)
 
 app.get("/", function(talep,cevap)
 	{
-		cevap.sendFile(yol.join(__dirname + "/index.html"));
+		cevap.sendFile(yol.join(__dirname + "/newIndex.html"));
 	});
 
 console.log("Sunucu Aktif");
