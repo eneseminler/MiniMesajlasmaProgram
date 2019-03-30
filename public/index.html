@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Mesajlaşma</title>
+
+        <link rel="stylesheet" href="https://bootswatch.com/3/darkly/bootstrap.min.css" type="text/css">
+
+        <link rel="stylesheet" type="text/css" href="style.css">
+
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-2" style="padding-top: 135px;">
+                    <div class="panel panel-primary">
+                     <div class="panel-heading">
+                        <h3 class="panel-title panel-title-left">Odalar</h3><h3 class="panel-title-right">3</h3>
+                        </div>
+                        <div class="panel-body pre-scrollable liste" style="height:350px;">
+                           
+                        </div>
+                        <div class="panel-footer">
+                            <span class="bildirim2">Bildirim2 Alanı</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7" style="padding-top: 20px;">
+                    <center>
+                            <h3 class="baslik">ORTAK ODA</h3>
+                            <p class="lead">Herkesin olduğu yer</p>
+                    </center>
+                     
+                    <div class="panel panel-primary">
+                     <div class="panel-heading">
+                        <h3 class="panel-title">Chat</h3>
+                        </div>
+                        <div class="panel-body pre-scrollable mesajlar" style="height:350px;">
+                            
+                        </div>
+                        <div class="panel-footer">
+                            <input class="form-control mesajText" onkeypress="yazildi()" rows="2" placeholder="Bir şeyler yaz...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3" style="padding-top: 135px;">
+                    <div class="panel panel-primary">
+                     <div class="panel-heading">
+                        <h3 class="panel-title panel-title-left">Çevrimiçi Kullanıcılar</h3><h3 class="panel-title-right">1</h3>
+                        </div>
+                        <div class="panel-body pre-scrollable liste" style="height:350px;">
+                           
+                        </div>
+                        <div class="panel-footer">
+                            <span class="bildirim">Bildirim Alanı</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://bootswatch.com/3/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+      <script type="text/javascript">
+
+    
+
+
+    var socket = io.connect();
+   
+       var isim = "";
+       var kullanici_sayi = 0;
+       var dizi = ["Saab", "Volvo", "BMW"];
+       $(document).ready(function(){
+        $('#loginModal').modal({
+            backdrop: 'static',
+            show: "true",
+            keyboard: false
+        });
+       });
+
+       function login()
+       {
+           var tus = window.event.keyCode;
+           if( tus == 13 )
+           {
+               var username = $("#username").val();
+               if( username == '' )
+               {
+                    $("#errUsername").show();
+               }
+               else
+               {
+                    socket.emit("gonder", username);
+                    $("#loginModal").modal("hide");
+                    isim = username;
+               }
+           }
+       }
+    
+
+
+
+        function yazildi(){
+        var tus = window.event.keyCode;
+        if (tus == 13)
+        {
+            // var metin = document.getElementById('mesaj').value;
+            var metin =  $(".mesajText").val();
+            if( metin ==  '' )
+            {
+                alert("sa");
+                exit;
+            }
+            socket.emit("MesajGonder", {"mesaj":metin,"kullanici":isim});
+
+            $(".mesajText").val("");
+            // document.getElementById('mesaj').value = "";
+        }
+        else{
+            socket.emit("Yaz",isim);
+            
+        }
+        }
+
+
+
+
+        socket.on("Yaziyor", function(veri)
+        {
+            if (isim != veri) {
+                 $(".bildirim" ).text(veri + " yazıyor.");
+
+            }
+        })
+
+
+        socket.on("MesajAl", function(veri)
+        {
+            $(".mesajlar").append('<div class="panel panel-default"><div class="panel-body"><strong>'+veri.kullanici+'</strong>: '+veri.mesaj+'</div></div>');
+            $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
+            // $('.mesajlar').append($('').text(veri.kullanici + ": " + veri.mesaj));
+        });
+
+    
+
+
+
+
+//Kullanıcı Giriş yaptığında çalışır.
+
+    socket.on("Giris", function(veri)
+    {
+        var sy = veri.sayi;
+        var usr = veri.isim;
+        dizi = veri.liste;
+        $(".panel-title-right").text(" " + sy);
+        $(".bildirim" ).text(usr + " sisteme giriş yaptı.");
+
+        $(".liste_eleman").remove();
+        for (i = 0; i < sy; i++) {
+         $(".liste").append('<div class="liste_eleman"><strong>' + dizi[i]+ '</strong></div>');
+        }
+
+    });
+
+    socket.on("Cikis", function(veri)
+    {
+        var sy = veri.sayi;
+        var usr = veri.isim;
+        dizi = veri.liste;
+        $(".panel-title-right").text(" " + sy);
+        $(".bildirim" ).text(usr + " sistemden çıkış yaptı.");
+
+        $(".liste_eleman").remove();
+        for (i = 0; i < sy; i++) {
+         $(".liste").append('<div class="liste_eleman"><strong>' + dizi[i]+ '</strong></div>');
+        }
+
+    })
+
+
+
+//Kullanıcı çıktığında
+    socket.on('disconnect', () => {
+        log('you have been disconnected');
+    });
+
+
+
+
+
+    </script>
+
+
+        <div class="modal" id="loginModal" class="display:none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Giriş Yap</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Devam etmeden önce giriş yapmalısınız</p>
+                        <p id="errUsername" style="display:none;color:red;">Geçerli bir kullanıcı adı girmelisiniz.</p>
+                        <input type="text" onkeypress="login()" id="username" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+ .panel-body strong{
+    color: #375a7f;
+}
+
+.panel-title{
+    display: inline-block;
+}
+.panel-title-right{
+    float: right;
+    font-size: 17px;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 17px;
+    color: inherit;
+}
+
+.bildirim{
+	height: 40px;
+	display: inline-block;
+	padding: 10px;
+}
+.bildirim2{
+	height: 40px;
+	display: inline-block;
+	padding: 10px;
+}
+
+.liste_eleman strong{
+	color: white;
+	padding: 10px;
+	font-size: 25px;
+}

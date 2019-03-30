@@ -15,70 +15,92 @@ var baglanti = mysql.createConnection({
 
 baglanti.connect();
 
-var KullaniciSayi = 0;
-var Dizi;
-
-var id = "";
+var kullanici_sayi=0;
+var kullanicilar = ["Saab", "Volvo", "BMW"];
+var kullanicilar2 = ["Saab"];
 io.sockets.on("connection", function (socket){
 
 socket.on("gonder", function(veri)
 {
-	//kayıt ol ve giriş yap diye button olacak
-	//kayıt sayfası yapılacak
-	//giriş yaptığında veri buraya gelecek 
-	console.log(veri + "sisteme giriş yaptı.");
-	io.sockets.emit("al",veri);
-	console.log(socket.id);
 
-	var kisi = {kisi_id:socket.id, kisi_isim: veri};
-	var query = baglanti.query('insert into Kisi set ?',kisi, function(hata,cevap){
-		console.log(query.sql);
-		console.log(kisi);
+	//Giriş yapınca isim buraya geliyor.
+	//İsim var mı diye sorgu yap?
+	var isim = veri;
+	var sorgu = baglanti.query('select isim from kisi where isim=?',isim, function(hata,cevap){
+	if (cevap != '') {
+		//var q = ("UPDATE `kisi` SET `socketid` = ") + ("`") + socket.id+ ("`") + (" WHERE `kisi`.`isim` = ?");
+		var q = ('update kisi set socketid = \'') + socket.id + ('\' where isim=? ');
+		var query = baglanti.query(q,isim, function(hata2,cevap2){
+		console.log("Kişi socket id'si değiştirildi.");
 	});
-	++KullaniciSayi;
-	console.log(KullaniciSayi + "kisi serverda");
-	io.sockets.emit("alsayi",KullaniciSayi);
+	}
+	else{
+		var kisi = {socketid:socket.id, isim: isim};
+		var query = baglanti.query('insert into kisi set ?',kisi,function(hata3,cevap3){
+		console.log(" Kişi veritabanına eklendi");
+		
+		});
+	}
+	});
+
+
+	console.log(veri + "   sisteme giriş yaptı.");
+	kullanicilar[kullanici_sayi] = veri;
+	++kullanici_sayi;
+	var a = {sayi:kullanici_sayi, isim:veri, liste:kullanicilar};
+	io.sockets.emit("Giris",a);
 })
 
-socket.on('disconnect', function () {
-    console.log('user disconnected');
-    --KullaniciSayi;
-   	console.log(socket.id);
 
-	io.sockets.emit("alsayi",KullaniciSayi);
 
-	var kisi_id = socket.id;
-	var sorgula = baglanti.query('select kisi_isim from Kisi where kisi_id=?',kisi_id, function(hata,cevap){
-		Dizi = cevap[0].kisi_isim;
-		io.sockets.emit("cikti", Dizi);
-	});
-    });
 
-socket.on('cikis',function(username){
 
-	console.log(socket.username + " server "+ socket.id);
-	io.sockets.emit('cikti',socket.username);
-});
-
-socket.on("mesaj", function(veri)
+socket.on("MesajGonder", function(veri)
 {
-	console.log(veri);
-	var kisi_adi = veri.kullanici;
-	var sorgula = baglanti.query('select kisi_id from Kisi where kisi_isim=?',kisi_adi, function(hata,cevap){
-		console.log(sorgula.sql);
-		console.log(kisi_adi + "id sorgusu");
-		console.log(cevap);
-	id = cevap[0].kisi_id;
-	console.log(id);
-
-	var mesaj = {kisi_id:id,mesaj_tarih:veri.mesaj ,mesaj:veri.mesaj}; 
-	var query = baglanti.query('insert into Mesaj set ?',mesaj, function(hata,cevap){
-		console.log(query.sql);
-		console.log(" sorgu mesaj yazdırma");
-	});
-	io.sockets.emit("mesajAl",veri);
-	});
 	
+	var mesaj = {mesaj_kisi:veri.kullanici,mesaj_icerik:veri.mesaj,mesaj_tarih:"30.04.19"};
+	var query = baglanti.query('insert into genel set ?',mesaj, function(hata,cevap){
+		console.log(query.sql);
+		console.log(mesaj);
+	});
+	io.sockets.emit("MesajAl",veri);
+})
+
+socket.on("Yaz", function(veri)
+{
+	io.sockets.emit("Yaziyor",veri);
+})
+
+socket.on('disconnect', () => {
+
+   	var usr;
+   	//console.log(socket.id);
+    var sorgula = baglanti.query('select isim from kisi where socketid=?',socket.id, function(hata,cevap){
+    //console.log(sorgula.sql);
+    //console.log(cevap);
+
+	usr = cevap[0].isim;
+	console.log("id den isim sorgusu");
+	console.log(usr);
+	var a = kullanicilar.indexOf(usr);
+	kullanicilar[a] = "0";
+	var test = kullanici_sayi;
+	for (i = 0,y=0; i < test; i++) {
+		
+		if (kullanicilar[i] != "0") {
+			kullanicilar2[y] = kullanicilar[i];
+		
+			y++;
+		}
+	}
+	kullanicilar = kullanicilar2;
+	
+    console.log(usr);
+	--kullanici_sayi;
+	var b = {sayi:kullanici_sayi, isim:usr, liste:kullanicilar};
+    io.sockets.emit("Cikis",b);
+})
+    
 })
 
 
@@ -87,9 +109,6 @@ socket.on("mesaj", function(veri)
 
 
 
-app.get("/", function(talep,cevap)
-	{
-		cevap.sendFile(yol.join(__dirname + "/newIndex.html"));
-	});
+app.use(express.static(yol.join(__dirname, 'public')));
 
 console.log("Sunucu Aktif");
