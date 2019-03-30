@@ -14,20 +14,27 @@
     <body>
         <div class="container">
             <div class="row">
-                    <div class="col-md-2" style="padding-top: 135px;">
+                    <div class="col-md-3" style="padding-top: 135px;">
                     <div class="panel panel-primary">
                      <div class="panel-heading">
                         <h3 class="panel-title panel-title-left">Odalar</h3><h3 class="panel-title-right">3</h3>
                         </div>
-                        <div class="panel-body pre-scrollable liste" style="height:350px;">
-                           
+                        <div class="panel-body pre-scrollable" style="height:350px;">
+                            <div class="btn-group-vertical oda" role="group" aria-label="Vertical button group">
+
+                                <button id="genel" type="button" class="btn btn-success oda_eleman">Genel</button>
+                                <button id="kirmizi" type="button" class="btn btn-success oda_eleman">Kırmızı</button>
+                                <button id="yesil" type="button" class="btn btn-success oda_eleman">Yeşil</button>
+                                <button id="mavi" type="button" class="btn btn-success oda_eleman">Mavi</button>
+                            </div>
+                                                       
                         </div>
                         <div class="panel-footer">
                             <span class="bildirim2">Bildirim2 Alanı</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-7" style="padding-top: 20px;">
+                <div class="col-md-6" style="padding-top: 20px;">
                     <center>
                             <h3 class="baslik">ORTAK ODA</h3>
                             <p class="lead">Herkesin olduğu yer</p>
@@ -35,12 +42,12 @@
                      
                     <div class="panel panel-primary">
                      <div class="panel-heading">
-                        <h3 class="panel-title">Chat</h3>
+                        <h3 class="panel-title oda_adi">Chat</h3>
                         </div>
                         <div class="panel-body pre-scrollable mesajlar" style="height:350px;">
                             
                         </div>
-                        <div class="panel-footer">
+                        <div class="panel-footer"  id="MesajSakla">
                             <input class="form-control mesajText" onkeypress="yazildi()" rows="2" placeholder="Bir şeyler yaz...">
                         </div>
                     </div>
@@ -51,8 +58,10 @@
                      <div class="panel-heading">
                         <h3 class="panel-title panel-title-left">Çevrimiçi Kullanıcılar</h3><h3 class="panel-title-right">1</h3>
                         </div>
-                        <div class="panel-body pre-scrollable liste" style="height:350px;">
+                        <div class="panel-body pre-scrollable " style="height:350px;">
                            
+                            <div class="btn-group-vertical liste" role="group" aria-label="Vertical button group">
+                            </div>
                         </div>
                         <div class="panel-footer">
                             <span class="bildirim">Bildirim Alanı</span>
@@ -74,6 +83,8 @@
        var isim = "";
        var kullanici_sayi = 0;
        var dizi = ["Saab", "Volvo", "BMW"];
+       var oda = "GENEL";
+
        $(document).ready(function(){
         $('#loginModal').modal({
             backdrop: 'static',
@@ -97,42 +108,47 @@
                     socket.emit("gonder", username);
                     $("#loginModal").modal("hide");
                     isim = username;
+                    $("#MesajSakla").hide();
+                    $(".oda_adi").text("Lütfen Oda seçiniz...");
                }
            }
        }
     
 
 
-
         function yazildi(){
         var tus = window.event.keyCode;
         if (tus == 13)
         {
-            // var metin = document.getElementById('mesaj').value;
+
+            socket.emit("OdaGiris1",tus);
+
             var metin =  $(".mesajText").val();
             if( metin ==  '' )
             {
                 alert("sa");
                 exit;
             }
-            socket.emit("MesajGonder", {"mesaj":metin,"kullanici":isim});
+            socket.emit("MesajGonder", {"mesaj":metin,"kullanici":isim,"oda":oda});
 
             $(".mesajText").val("");
             // document.getElementById('mesaj').value = "";
+
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman_kendi"><div class="panel-body"><strong>'+isim+':</strong>&nbsp;&nbsp; '+metin+'</div></div>');
+            
         }
         else{
-            socket.emit("Yaz",isim);
+
+            socket.emit("Yaz",{"kullanici":isim,"oda":oda});
             
         }
         }
 
 
-
-
         socket.on("Yaziyor", function(veri)
         {
-            if (isim != veri) {
-                 $(".bildirim" ).text(veri + " yazıyor.");
+            if (isim != veri.kullanici) {
+                 $(".bildirim" ).text(veri.kullanici + " yazıyor.");
 
             }
         })
@@ -140,7 +156,8 @@
 
         socket.on("MesajAl", function(veri)
         {
-            $(".mesajlar").append('<div class="panel panel-default"><div class="panel-body"><strong>'+veri.kullanici+'</strong>: '+veri.mesaj+'</div></div>');
+            console.log(veri.mesaj);
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri.kullanici+':</strong> &nbsp;&nbsp;'+veri.mesaj+'</div></div>');
             $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
             // $('.mesajlar').append($('').text(veri.kullanici + ": " + veri.mesaj));
         });
@@ -162,9 +179,15 @@
 
         $(".liste_eleman").remove();
         for (i = 0; i < sy; i++) {
-         $(".liste").append('<div class="liste_eleman"><strong>' + dizi[i]+ '</strong></div>');
+         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman">' + dizi[i] + '</button>');
         }
 
+    });
+
+    socket.on("OdaGiris", function(veri)
+    {
+        $(".bildirim2" ).text(veri + " odaya giriş yaptı.");
+       
     });
 
     socket.on("Cikis", function(veri)
@@ -177,7 +200,7 @@
 
         $(".liste_eleman").remove();
         for (i = 0; i < sy; i++) {
-         $(".liste").append('<div class="liste_eleman"><strong>' + dizi[i]+ '</strong></div>');
+         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman">' + dizi[i] + '</button>');
         }
 
     })
@@ -190,7 +213,55 @@
     });
 
 
+    socket.on("GecmisMesaj", function(veri)
+    {
+        for(i=(veri.length-20); i<veri.length; i++)
+        {
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri[i].mesaj_kisi+':</strong> &nbsp;&nbsp;'+veri[i].mesaj_icerik+'</div></div>');
+            $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
 
+        }
+
+    });
+
+
+    $( ".liste_eleman" ).click(function() {
+
+         var id = this.id;
+         console.log(id);
+         $(".oda").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary oda_eleman">' + dizi[i] + '</button>');
+      
+         socket.emit("OdaAc", id);
+        
+    });
+
+    $( ".oda_eleman" ).click(function() {
+         
+        var id = this.id;
+        oda = id;
+        socket.emit("OdaAc", {"kullanici":isim,"oda":oda});
+        $(".mesaj_eleman").remove();
+        $(".mesaj_eleman_kendi").remove();
+        $(".baslik").text(id + " ODA");
+        $(".oda_adi").text(id);
+        
+        $("#MesajSakla").show();
+        
+        $( "button" ).removeClass("active");
+        $( "." + id ).addClass("active");
+         
+    });
+
+
+        // $(() => {
+        //        $("#kirmizi").click(() => {
+        //             socket.emit("login", $(kirmizi);
+        //        });
+        //        socket.on("message", data => 
+        //        //$("#message").append(`<li>${data} odasına bağlanıldı.</li>`)
+        //        console.log("baglanildi kırmızı");
+        //        );
+        //   });
 
 
     </script>

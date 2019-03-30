@@ -18,11 +18,13 @@ baglanti.connect();
 var kullanici_sayi=0;
 var kullanicilar = ["Saab", "Volvo", "BMW"];
 var kullanicilar2 = ["Saab"];
+let sockets= {};
+
+
 io.sockets.on("connection", function (socket){
 
 socket.on("gonder", function(veri)
 {
-
 	//Giriş yapınca isim buraya geliyor.
 	//İsim var mı diye sorgu yap?
 	var isim = veri;
@@ -43,12 +45,14 @@ socket.on("gonder", function(veri)
 	}
 	});
 
+	sockets[isim] = socket.id;
 
 	console.log(veri + "   sisteme giriş yaptı.");
 	kullanicilar[kullanici_sayi] = veri;
 	++kullanici_sayi;
 	var a = {sayi:kullanici_sayi, isim:veri, liste:kullanicilar};
 	io.sockets.emit("Giris",a);
+
 })
 
 
@@ -57,18 +61,28 @@ socket.on("gonder", function(veri)
 
 socket.on("MesajGonder", function(veri)
 {
-	
+
+
 	var mesaj = {mesaj_kisi:veri.kullanici,mesaj_icerik:veri.mesaj,mesaj_tarih:"30.04.19"};
-	var query = baglanti.query('insert into genel set ?',mesaj, function(hata,cevap){
-		console.log(query.sql);
-		console.log(mesaj);
+
+	var a = veri.oda;
+	var q = 'insert into ' + a + ' set ?';
+	
+	var query = baglanti.query(q ,mesaj, function(hata,cevap){
+		
 	});
-	io.sockets.emit("MesajAl",veri);
+	
+	
+	socket.broadcast.to(veri.oda).emit('MesajAl', veri);	
+	
+	//io.to(sockets[veri.mesaj]).emit(("MesajAl",veri));
+
+
 })
 
 socket.on("Yaz", function(veri)
 {
-	io.sockets.emit("Yaziyor",veri);
+	socket.broadcast.to(veri.oda).emit('Yaziyor', veri);
 })
 
 socket.on('disconnect', () => {
@@ -80,8 +94,7 @@ socket.on('disconnect', () => {
     //console.log(cevap);
 
 	usr = cevap[0].isim;
-	console.log("id den isim sorgusu");
-	console.log(usr);
+	delete sockets[usr]; 
 	var a = kullanicilar.indexOf(usr);
 	kullanicilar[a] = "0";
 	var test = kullanici_sayi;
@@ -95,7 +108,6 @@ socket.on('disconnect', () => {
 	}
 	kullanicilar = kullanicilar2;
 	
-    console.log(usr);
 	--kullanici_sayi;
 	var b = {sayi:kullanici_sayi, isim:usr, liste:kullanicilar};
     io.sockets.emit("Cikis",b);
@@ -105,9 +117,31 @@ socket.on('disconnect', () => {
 
 
 
+socket.on("OdaAc",function(veri){
+
+console.log(veri);
+
+socket.join(veri.oda);
+
+
+socket.broadcast.to(veri.oda).emit("OdaGiris", veri.kullanici);
+var a = "select * from " +veri.oda;
+console.log(a);
+var sorgula = baglanti.query(a, function(hata,cevap){
+	  
+	 console.log(cevap);
+	 console.log(sorgula.sql);
+	io.to(socket.id).emit("GecmisMesaj", cevap);
+
 });
 
 
+//connect sonu silme
+
+});
+
+
+});
 
 app.use(express.static(yol.join(__dirname, 'public')));
 

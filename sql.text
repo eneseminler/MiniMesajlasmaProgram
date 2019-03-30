@@ -1,0 +1,1 @@
+CREATE TABLE `nodejs`.`yesil` ( `id` INT NOT NULL AUTO_INCREMENT , `mesaj_kisi` VARCHAR(30) NOT NULL , `mesaj_icerik` TEXT NOT NULL , `mesaj_tarih` VARCHAR(20) NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;

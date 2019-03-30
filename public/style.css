@@ -30,3 +30,30 @@
 	padding: 10px;
 	font-size: 25px;
 }
+
+.btn-group-vertical{
+	margin-left: 20px;
+}
+
+.mesaj_eleman_kendi{
+	border-color: #e78853;
+}
+
+.mesaj_eleman_kendi strong{
+	color: #e78853;
+}
+.mesaj_eleman{
+	border-color: #99cc99;
+}
+
+.mesaj_eleman strong{
+	color: #99cc99;
+}
+
+.liste{
+	display: contents;
+}
+
+.oda{
+	display: contents;
+}
