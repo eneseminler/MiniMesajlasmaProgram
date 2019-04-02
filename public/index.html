@@ -17,15 +17,15 @@
                     <div class="col-md-3" style="padding-top: 135px;">
                     <div class="panel panel-primary">
                      <div class="panel-heading">
-                        <h3 class="panel-title panel-title-left">Odalar</h3><h3 class="panel-title-right">3</h3>
+                        <h3 class="panel-title panel-title-left">Odalar</h3><h3 class="panel-title-right OdaSayi">3</h3>
                         </div>
                         <div class="panel-body pre-scrollable" style="height:350px;">
                             <div class="btn-group-vertical oda" role="group" aria-label="Vertical button group">
 
-                                <button id="genel" type="button" class="btn btn-success oda_eleman">Genel</button>
-                                <button id="kirmizi" type="button" class="btn btn-success oda_eleman">Kırmızı</button>
+                                <button id="genel" type="button" class="btn btn-primary oda_eleman">Genel</button>
+                                <button id="kirmizi" type="button" class="btn btn-danger oda_eleman">Kırmızı</button>
                                 <button id="yesil" type="button" class="btn btn-success oda_eleman">Yeşil</button>
-                                <button id="mavi" type="button" class="btn btn-success oda_eleman">Mavi</button>
+                                <button id="mavi" type="button" class="btn btn-info oda_eleman">Mavi</button>
                             </div>
                                                        
                         </div>
@@ -56,7 +56,7 @@
                 <div class="col-md-3" style="padding-top: 135px;">
                     <div class="panel panel-primary">
                      <div class="panel-heading">
-                        <h3 class="panel-title panel-title-left">Çevrimiçi Kullanıcılar</h3><h3 class="panel-title-right">1</h3>
+                        <h3 class="panel-title panel-title-left">Çevrimiçi Kullanıcılar</h3><h3 class="panel-title-right KullaniciSayi">1</h3>
                         </div>
                         <div class="panel-body pre-scrollable " style="height:350px;">
                            
@@ -81,9 +81,12 @@
     var socket = io.connect();
    
        var isim = "";
+       var isim2 = "";
        var kullanici_sayi = 0;
-       var dizi = ["Saab", "Volvo", "BMW"];
+       var dizi = [""];
        var oda = "GENEL";
+       var odaSayi = 3;
+       var disabled = [isim];
 
        $(document).ready(function(){
         $('#loginModal').modal({
@@ -129,12 +132,16 @@
                 alert("sa");
                 exit;
             }
-            socket.emit("MesajGonder", {"mesaj":metin,"kullanici":isim,"oda":oda});
-
+            var u = Tarih();
+            socket.emit("MesajGonder", {"mesaj":metin,"kullanici":isim,"kullanici2":isim2,"oda":oda,"tarih":u});
+            console.log(oda);
+            console.log("yazildi.");
+            
+            console.log(u);
             $(".mesajText").val("");
             // document.getElementById('mesaj').value = "";
 
-            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman_kendi"><div class="panel-body"><strong>'+isim+':</strong>&nbsp;&nbsp; '+metin+'</div></div>');
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman_kendi"><div class="panel-body"><strong>'+isim+':</strong> &nbsp;&nbsp;'+metin+'</span><span class="tarih">' + u + '</span></div></div>');
             
         }
         else{
@@ -156,11 +163,34 @@
 
         socket.on("MesajAl", function(veri)
         {
-            console.log(veri.mesaj);
-            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri.kullanici+':</strong> &nbsp;&nbsp;'+veri.mesaj+'</div></div>');
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri.kullanici+':</strong> &nbsp;&nbsp;'+veri.mesaj+'</span><span class="tarih">' + veri.tarih + '</span></div></div>');
             $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
             // $('.mesajlar').append($('').text(veri.kullanici + ": " + veri.mesaj));
         });
+
+        socket.on("YeniMesaj", function(veri)
+        {            
+
+
+            console.log(veri.oda);
+            console.log("bu odaya yazıldı");
+            
+            console.log(isim);
+            console.log("bu odada olmalı");
+            
+            
+            if (veri.kullanici2 == isim) {
+                if (veri.oda != oda) {
+
+                $(".oda_adi").text(veri.kullanici + " size özel mesaj gönderdi!");
+
+                $( "#" + veri.kullanici ).removeClass("btn-primary");
+                
+                $( "#" + veri.kullanici ).addClass("btn-danger");
+                
+                }
+            }
+        })
 
     
 
@@ -174,12 +204,35 @@
         var sy = veri.sayi;
         var usr = veri.isim;
         dizi = veri.liste;
-        $(".panel-title-right").text(" " + sy);
+        $(".KullaniciSayi").text(" " + sy);
         $(".bildirim" ).text(usr + " sisteme giriş yaptı.");
 
         $(".liste_eleman").remove();
         for (i = 0; i < sy; i++) {
-         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman">' + dizi[i] + '</button>');
+         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman" onclick="KisiTik(this.id)">' + dizi[i] + '</button>');
+         if (disabled[dizi[i]] != null) {
+
+        $( "#" + dizi[i] ).addClass("disabled");
+         }
+        }
+
+    });
+
+    socket.on("Cikis", function(veri)
+    {
+        var sy = veri.sayi;
+        var usr = veri.isim;
+        dizi = veri.liste;
+        $(".KullaniciSayi").text(" " + sy);
+        $(".bildirim" ).text(usr + " sistemden çıkış yaptı.");
+
+        $(".liste_eleman").remove();
+        for (i = 0; i < sy; i++) {
+         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman" onclick="KisiTik(this.id)"> ' + dizi[i] + '</button>');
+         if (disabled[dizi[i]] != null) {
+
+        $( "#" + dizi[i] ).addClass("disabled");
+         }
         }
 
     });
@@ -190,34 +243,35 @@
        
     });
 
-    socket.on("Cikis", function(veri)
+    socket.on("OdaCikis", function(veri)
     {
-        var sy = veri.sayi;
-        var usr = veri.isim;
-        dizi = veri.liste;
-        $(".panel-title-right").text(" " + sy);
-        $(".bildirim" ).text(usr + " sistemden çıkış yaptı.");
-
-        $(".liste_eleman").remove();
-        for (i = 0; i < sy; i++) {
-         $(".liste").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary liste_eleman">' + dizi[i] + '</button>');
-        }
-
-    })
+        $(".bildirim2" ).text(veri + " odadan çıkış yaptı.");
+       
+    });
 
 
 
 //Kullanıcı çıktığında
     socket.on('disconnect', () => {
-        log('you have been disconnected');
+        console.log('you have been disconnected');
     });
 
 
     socket.on("GecmisMesaj", function(veri)
     {
-        for(i=(veri.length-20); i<veri.length; i++)
+        for(i=0; i<veri.length; i++)
         {
-            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri[i].mesaj_kisi+':</strong> &nbsp;&nbsp;'+veri[i].mesaj_icerik+'</div></div>');
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri[i].mesaj_kisi+':</strong> &nbsp;&nbsp; <span>'+veri[i].mesaj_icerik+'</span><span class="tarih">' + veri[i].mesaj_tarih + '</span></div></div>');
+            $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
+
+        }
+
+    });
+    socket.on("GecmisMesajOzel", function(veri)
+    {
+        for(i=0; i<veri.length; i++)
+        {
+            $(".mesajlar").append('<div class="panel panel-default mesaj_eleman"><div class="panel-body"><strong>'+veri[i].mesaj_gonderen+':</strong> &nbsp;&nbsp;'+veri[i].mesaj_icerik+'</span><span class="tarih">' + veri[i].mesaj_tarih + '</span></div></div>');
             $(".pre-scrollable").scrollTop($(".pre-scrollable").get(0).scrollHeight);
 
         }
@@ -225,25 +279,68 @@
     });
 
 
-    $( ".liste_eleman" ).click(function() {
-
-         var id = this.id;
+    function KisiTik(e){
+        console.log("geldi");
+         var id = e;
          console.log(id);
-         $(".oda").append('<button id="'+ dizi[i] + '"type="button" class="btn btn-primary oda_eleman">' + dizi[i] + '</button>');
-      
-         socket.emit("OdaAc", id);
+         console.log("tıkladın");
+  
+         $(".oda").append('<button id="'+ id + '"type="button" class="btn btn-primary liste_oda_eleman" onclick="KisiOdaTik(this.id)"">' + id + '</button>');
+
+
+            $( "#" + id ).removeClass("btn-danger");
+            
+            $( "#" + id ).addClass("btn-primary");
+
         
-    });
+            if ($( "#" + e ).hasClass()) {
+                $( "#" + e ).addClass("disabled");
+            }
+
+            ++odaSayi;
+            $(".OdaSayi").text(odaSayi);
+            disabled.push(id);
+      
+        // socket.emit("OdaAc", id);
+    }
+
+
+
+    function KisiOdaTik(e){
+        console.log("geldik hafız");
+        var id = e;
+        socket.emit("OdaKapa",{"kullanici":isim,"oda":oda});
+        console.log("geldik hafız");
+        oda = id;
+        socket.emit("OdaAcKisi", {"kullanici":isim,"oda":oda});
+        isim2 = oda;
+        oda = ((isim.length)*(id.length)*33)+(id.length+isim.length);
+
+        $(".mesaj_eleman").remove();
+        $(".mesaj_eleman_kendi").remove();
+        $(".baslik").text(id + " Şahsi Mesaj");
+        $(".oda_adi").text(id);
+        
+        $("#MesajSakla").show();
+        
+        $( "button" ).removeClass("active");
+        $( "." + id ).addClass("active");
+         
+
+    }
+
 
     $( ".oda_eleman" ).click(function() {
          
         var id = this.id;
+        socket.emit("OdaKapa",{"kullanici":isim,"oda":oda});
         oda = id;
         socket.emit("OdaAc", {"kullanici":isim,"oda":oda});
+
         $(".mesaj_eleman").remove();
         $(".mesaj_eleman_kendi").remove();
-        $(".baslik").text(id + " ODA");
-        $(".oda_adi").text(id);
+        $(".baslik").text(id.toUpperCase() + " ODA");l
+        $(".oda_adi").text(id.toUpperCase());
         
         $("#MesajSakla").show();
         
@@ -252,6 +349,12 @@
          
     });
 
+    function Tarih(){
+        var d = new Date();
+        var a=  d.getDate() + "." +  d.getMonth()+ "." + d.getFullYear()  + "-" + d.getHours() + ":" + d.getMinutes(); 
+
+        return a;
+    }
 
         // $(() => {
         //        $("#kirmizi").click(() => {

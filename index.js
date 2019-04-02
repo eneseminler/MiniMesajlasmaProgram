@@ -19,7 +19,7 @@ var kullanici_sayi=0;
 var kullanicilar = ["Saab", "Volvo", "BMW"];
 var kullanicilar2 = ["Saab"];
 let sockets= {};
-
+let socketsoda = {};
 
 io.sockets.on("connection", function (socket){
 
@@ -33,13 +33,13 @@ socket.on("gonder", function(veri)
 		//var q = ("UPDATE `kisi` SET `socketid` = ") + ("`") + socket.id+ ("`") + (" WHERE `kisi`.`isim` = ?");
 		var q = ('update kisi set socketid = \'') + socket.id + ('\' where isim=? ');
 		var query = baglanti.query(q,isim, function(hata2,cevap2){
-		console.log("Kişi socket id'si değiştirildi.");
+		//console.log("Kişi socket id'si değiştirildi.");
 	});
 	}
 	else{
 		var kisi = {socketid:socket.id, isim: isim};
 		var query = baglanti.query('insert into kisi set ?',kisi,function(hata3,cevap3){
-		console.log(" Kişi veritabanına eklendi");
+		//console.log(" Kişi veritabanına eklendi");
 		
 		});
 	}
@@ -47,43 +47,58 @@ socket.on("gonder", function(veri)
 
 	sockets[isim] = socket.id;
 
-	console.log(veri + "   sisteme giriş yaptı.");
+	//console.log(veri + "   sisteme giriş yaptı.");
 	kullanicilar[kullanici_sayi] = veri;
 	++kullanici_sayi;
 	var a = {sayi:kullanici_sayi, isim:veri, liste:kullanicilar};
 	io.sockets.emit("Giris",a);
 
-})
-
-
-
+});
 
 
 socket.on("MesajGonder", function(veri)
 {
 
+	var oda = veri.oda;
+	var d = Tarih();
+	veri.mesaj_tarih = d;
+	if (oda == "genel" || oda == "kirmizi" || oda == "yesil" || oda == "mavi") {
 
-	var mesaj = {mesaj_kisi:veri.kullanici,mesaj_icerik:veri.mesaj,mesaj_tarih:"30.04.19"};
+	var q = 'insert into ' + oda + ' set ?';
+	
+	var mesaj = {mesaj_kisi:veri.kullanici,mesaj_icerik:veri.mesaj,mesaj_tarih:veri.mesaj_tarih};
+	var query = baglanti.query(q ,mesaj, function(hata,cevap){
+		
+	});
+	socket.broadcast.to(oda).emit('MesajAl', veri);	
+	}
+	else{
+	
 
-	var a = veri.oda;
-	var q = 'insert into ' + a + ' set ?';
+	console.log(veri.kullanici);
+	console.log("mesaj gonderiyor");
+	console.log(oda);
+	var q = 'insert into ozel set ?';
+
+	var mesaj = {oda:oda,mesaj_gonderen:veri.kullanici,mesaj_alici:oda,mesaj_icerik:veri.mesaj,mesaj_tarih:veri.mesaj_tarih};
 	
 	var query = baglanti.query(q ,mesaj, function(hata,cevap){
 		
 	});
+	io.sockets.emit("YeniMesaj",veri);
+	socket.broadcast.to(oda).emit('MesajAl', veri);	
+	}
 	
-	
-	socket.broadcast.to(veri.oda).emit('MesajAl', veri);	
 	
 	//io.to(sockets[veri.mesaj]).emit(("MesajAl",veri));
 
 
-})
+});
 
 socket.on("Yaz", function(veri)
 {
 	socket.broadcast.to(veri.oda).emit('Yaziyor', veri);
-})
+});
 
 socket.on('disconnect', () => {
 
@@ -113,36 +128,74 @@ socket.on('disconnect', () => {
     io.sockets.emit("Cikis",b);
 })
     
-})
+});
 
 
+socket.on("OdaKapa",function(veri){
+
+socket.broadcast.to(veri.oda).emit("OdaCikis", veri.kullanici);
+
+});
 
 socket.on("OdaAc",function(veri){
 
-console.log(veri);
+//console.log(veri);
 
 socket.join(veri.oda);
-
+var oda = veri.oda;
 
 socket.broadcast.to(veri.oda).emit("OdaGiris", veri.kullanici);
+
 var a = "select * from " +veri.oda;
-console.log(a);
+//console.log(a);
 var sorgula = baglanti.query(a, function(hata,cevap){
 	  
-	 console.log(cevap);
-	 console.log(sorgula.sql);
+	 //console.log(cevap);
+	// console.log(sorgula.sql);
 	io.to(socket.id).emit("GecmisMesaj", cevap);
 
 });
 
 
-//connect sonu silme
 
 });
 
+
+
+
+socket.on("OdaAcKisi",function(veri){
+
+//console.log(veri);
+
+var gercekoda = ((veri.oda.length)*(veri.kullanici.length)*33)+(veri.oda.length+veri.kullanici.length);
+console.log("gercekoda altta");
+console.log(gercekoda);
+socket.join(gercekoda);
+
+io.to(gercekoda).emit("OdaGiris", veri.kullanici);
+var a = "select * from ozel where oda=?";
+//console.log(a);
+	var sorgula = baglanti.query(a,gercekoda, function(hata,cevap){
+	  
+	 console.log(cevap);
+	console.log(sorgula.sql);
+	io.to(socket.id).emit("GecmisMesajOzel", cevap);
+
+});
+});
+
+
+    function Tarih(){
+        var d = new Date();
+        var a=  d.getDate() + "." +  d.getMonth()+ "." + d.getFullYear()  + "-" + d.getHours() + ":" + d.getMinutes(); 
+
+        return a;
+    }
+
+//connect sonu silme
 
 });
 
 app.use(express.static(yol.join(__dirname, 'public')));
 
-console.log("Sunucu Aktif");
+console.log("Sunucu Aktif ve 5000 Portu dinleniyor.");
